@@ -1,0 +1,432 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[square,numbers]{natbib}
+\bibliographystyle{unsrtnat}
+
+\title{Deep Learning for High Schoolers}
+\author{Sharad Vikram}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Artificial intelligence dominated
+the headlines when Google Deepmind's
+AlphaGo defeated Go professional 
+Lee Sedol. The event was a testament
+to the progress of artificial intelligence
+research over the past decade.
+One of the main components that 
+enabled AlphaGo to win,
+however, has been around for
+more than 30 years, namely
+the neural network.
+Over the past few years,
+neural network research
+has had a resurgence,
+resulting in a new
+area of research for artificial
+intelligence, called \emph{deep learning}.
+
+In this writeup, I explain
+from the ground up the core mathematics
+and algorithms
+used in deep learning.
+This writeup will act as lecture notes
+for a presentation to Torrey Pines High School
+math students, hence the name.
+The prerequisites are
+a basic understanding of multivariable calculus
+and linear algebra.
+
+\section{Background}
+Artificial intelligence is a broad
+term that encompasses several areas of
+research, but in general,
+the goal of artificial intelligence
+is to write computer programs
+that exhibit intelligent behavior.
+There are several approaches
+to writing such a computer program.
+<describe approaches>
+
+In this writeup, we focus on
+\emph{machine learning},
+where computers
+learn patterns from
+data to perform a task.
+
+\subsection*{What is machine learning?}
+Machine learning is the subfield of
+artificial intelligence
+dealing with learning from data.
+Machine learning itself can be split up
+into
+supervised and unsupervised learning.
+
+In supervised learning,
+the computer is provided
+data in the form of \emph{labeled examples},
+or input-output pairs,
+and is tasked with creating
+some function that maps inputs
+to outputs, while also generalizing
+to never before seen inputs.
+In unsupervised learning,
+the problem is much less specified.
+The computer is provided with data
+in the form of just inputs,
+and is tasked with discovering
+underlying patterns in the inputs.
+
+Unsupervised learning is considered
+much harder than supervised learning.
+Consider the classic supervised learning problem 
+of determining if an email is spam or not.
+Our program is provided with
+a set of emails, annotated with whether they are spam or not.
+It's not unreasonable that a computer program performs
+some sort of word association, to figure out
+which words are more associated with spam emails
+and which are not.
+However, now consider the same task,
+but we do not know which emails are spam beforehand.
+An unsupervised learning algorithm's goal
+would be to discover the properties of
+spammy emails, without knowledge of which ones
+are spam in the first place.
+
+In this writeup, we concentrate on a particular
+flavor of supervised learning algorithms,
+neural networks. Machine learning with
+``deep neural networks'', or deep learning 
+as it is called today, has skyrocketed
+in popularity.
+
+\section{Supervised Learning}
+The supervised learning problem can be expressed very concisely.
+Given a set of input-output pairs $\{(x_1, y_1)\, (x_2, y_2), \ldots, (x_N, y_N)\}$,
+return a function $h(x)$ that when given an
+input $x$, predicts its corresponding output $y$.
+In general, all $x$'s are vectors of identical dimension,
+but the form of $y$ can vary from task to task.
+
+Supervised learning problems can be broken down into
+two closely related tasks, \emph{classification} and \emph{regression},
+both of which relate to the type of prediction at hand.
+In classification, we want a function $h(x)$ that, from an input,
+predicts a category, for example
+deciding whether an email is spam or not. Each input
+can only belong to a finite set of categories. Other examples
+are facial recognition, where an picture of a face is mapped to a person,
+and song recognition, mapping snippets of noisy audio to the song they 
+originated from.
+In regression, we want $h(x)$ to output a real number. Examples of
+regression tasks include extrapolating stock market prices 
+and predicting atmospheric gas levels from noisy sensor readings.
+Although these two tasks are inherently different,
+the algorithms for each are very closely related to each other.
+
+Now, consider the following scenario. You're provided
+with a of input-output pairs $\{(x_1, y_1)\, (x_2, y_2), \ldots, (x_N, y_N)\}$,
+which we'll call a \emph{dataset}.
+How do we even begin coming up with an $h(x)$? A simple approach
+would be to ``memorize'' the dataset. When we pass an $x$
+into $h(x)$, it simply looks up the known examples
+in the dataset for a matching $x_i$, and returns the corresponding
+$y_i$. Although this approach is simple, it fails at \emph{generalizing}.
+Given an $x$ not in the dataset, $h(x)$ will not know what to do.
+We can't possibly expect this $h(x)$ to work in a real-life
+scenario with unexpected events and noise.
+
+An approach to better generalize 
+is to pick a functional form, or \emph{model},
+of $h(x)$. 
+There are so many possible options for $h(x)$,
+so we typically start by constraining the
+possible types of functions that $h(x)$ could be.
+For example, we could assert that $h(x)$ must be
+a \emph{linear function}, that is,
+if $x$ is a vector,
+\begin{align}
+  h(x) &= w^Tx + b
+\end{align}
+Now, the problem of finding 
+best $h(x)$ is much easier.
+Instead of deciding on the best $h(x)$
+to fit the data from the space of all possible
+functions, we just need to
+find the best $w$ and $b$,
+a task called \emph{linear regression}.
+We'll discuss exactly how find such a $w$ and $b$ later.
+
+Of course, asserting that $h(x)$
+is linear has downsides.
+For example, a linear function is ill-suited
+for any classification tasks,
+since linear functions map real-valued inputs
+to a real-valued output.
+Moreover, if the relationship
+between the inputs and outputs
+is far more complex than linear,
+our linear $h(x)$ would not be a great predictor.
+
+%Thus, we want to open the door to 
+%more complex functional forms.
+%A logical step up is
+%the $\emph{quadratic function}$.
+%For input vector $x$, our function
+%is constrained to the form
+%\begin{align}
+%h(x) = x^TAx + b^Tx + c
+%\end{align}
+%The ``unknowns''
+%are matrix $A$, vector $b$ and scalar $c$.
+%Amazingly, any function
+%that could have been produced
+%by linear regression,
+%could be produced by quadratic regression (plug in 
+%a matrix of zeros for $A$).
+
+We can imagine using more complex functions.
+Maybe a quadratic or a cubic
+or a 10th degree polynomial
+will fit the data better?
+Why wouldn't we then always use
+a more complex model?
+Why wouldn't we always use quadratic regression
+over linear regression? There are a couple
+issues that come up when we make our functions more complicated.
+In linear regression, where we had to
+only decide values $w$ and $b$, a vector
+and a scalar, we now have to decide
+values for a matrix, a vector,
+and a scalar. We now see a tradeoff
+with choosing a complicated functional form.
+As our functions grow more complex,
+we need to learn more unknowns from the data.
+
+The linear regression model isn't
+naturally built for classification.
+We can make it work though,
+by thresholding.
+First, imagine we're doing
+binary classification,
+where we're deciding between two
+classes, $0$ and $1$.
+We could take the output of our linear $h(x)$,
+and predict class $1$ if it's positive
+and class $0$ otherwise.
+What if we can make this linear classifier
+even better? Let's make it so instead of
+$h(x)$ predicting an arbitrary real value,
+it outputs
+the \emph{probability} of an input $x$
+belonging to class $1$.
+If the output is greater than $0.5$,
+then $P(\text{class}\; 1) > P(\text{class}\; 0)$
+and we'll output class $1$,
+and otherwise, we'll output class $0$.
+In order to do this, we need to force
+$h(x)$ to output a number between 0 and 1,
+requiring the use of the \emph{logistic function}.
+
+The logistic function is
+\begin{align}
+  \theta(z) = \frac{1}{1 + e^{-z}}
+\end{align}
+It has the effect of \emph{squashing} its
+input if it gets too high or low.
+As $z \rightarrow \infty$, $\theta(z) \rightarrow 1$,
+and as $z \rightarrow -\infty, \theta(z) \rightarrow 0$.
+Furthermore, $\theta(0) = 0.5$.
+Let's take the output of a linear function of $x$
+and pass it into the logistic function.
+We now get the model
+\begin{align}
+  h(x) = \frac{1}{1 + e^{-(w^Tx + b)}}
+\end{align}
+This function has the nice benefit of being a 
+linear classifier (if $w^Tx + b > 0$, then
+$P(\text{class} \; 1) > 0.5$),
+while also outputting a probability.
+It is a natural fit for binary classification,
+and the model is called \emph{logistic regression}.
+We'll soon see that logistic regression is a
+core building block of the neural network.
+
+\section{Neural Networks}
+Let's dive right into neural networks.
+Neural networks are a framework
+for building functions
+for both classification and regression tasks,
+\emph{inspired} by the biology of the brain.
+Let's quickly discuss how the brain works.
+The brain consists of cells called
+\emph{neurons}, which can be roughly divided
+into two parts, the dendrite and the axon.
+A dendrite receives signals from other neighboring neurons,
+combines them, and 
+fires a signal through its axon if the combined
+input signal is strong enough.
+A neuron will saturate if
+the input signal is strong enough.
+This means that the neuron's output
+caps as the input gets stronger.
+
+This idea of receiving inputs,
+combining them, and sending an output
+that saturates
+is the basis for what we call
+the \emph{artificial neuron}.
+The artificial neuron is an extremely
+rough model for a real neuron,
+so by no means is a neural
+network ``simulating'' the brain.
+The artificial neuron is a building block
+for a neural network just as the neuron
+is a building block for the brain.
+
+Mathematically, an artificial neuron
+receives inputs from other neurons
+in the form of a vector $x$.
+The output of the neuron is
+\begin{align*}
+  f(x) = \theta(w \cdot x + b)
+\end{align*}
+This looks oddly similar to our
+logistic regression function,
+if we just replaced the $\theta$ function
+with the logistic.
+In fact, a single artificial neuron
+is a generalization of logistic regression.
+Each element of the vector $x_i$
+represents the output of some
+other artificial neuron.
+We take a linear combination of the inputs
+as we do in linear regression, but then we apply
+$\theta$, a \emph{non-linear} function.
+This non-linear function often saturates,
+just like the logistic function,
+where the output converges as
+the input gets extremely positive or negative.
+Again, just like linear regression and
+logistic regression, the ``unknowns''
+in our function are $w$ and $b$.
+
+%Why is it crucial that $\theta$ be non-linear?
+%Imagine we were to string a bunch of neurons
+%together without applying $\theta$.
+%We would repeatedly be taking
+%linear combinations of an input $x$.
+%The problem is that multiple
+%linear combinations of $x$
+%can be represented by a single one,
+%so any number of linear neurons
+%could be equivalently represented by 
+%just one.
+
+The next big difference between
+a neural network and the brain
+is how we connect neurons together.
+In the real brain,
+there are cycles in neuron connectivity
+(neuron A can connect to neuron B which
+can connect back to C). In
+neural networks, we only allow
+\emph{feed-forward} connections.
+Neurons are only allowed to connect
+forwards, towards the desired output
+and there are no cycles allowed.
+It may seem like we're removing
+a critical component that makes the brain powerful,
+but cycles can make it almost impossible
+to do anything practical. We'll see why later.
+
+How do feed-forward connections work?
+It's easiest to see them layer-wise.
+Imagine the input to our network, $x$ (the data
+we wish to predict an output for),
+as a series of stacked nodes.
+Each of them feed into a layer of several stacked artificial neurons.
+Each of these artificial neurons performs its calculation (a linear combination
+and a non-linear function), and has its own output.
+This output itself can be fed into another layer of
+stacked neurons. Eventually, the final layer of our network
+will represent the network's prediction $y$.
+We can pick and choose how many layers
+there are in the network, and how many neurons
+are in each layer. This is where
+the power of neural networks comes in. Remember
+that there could be scenarios where
+a simple linear or logistic function isn't
+powerful enough. To make a neural network
+more complex, we simply make the layers
+bigger or add more layers.
+
+Let's look at a neural network
+in more mathematical detail.
+So each neuron
+performs a dot product, adds a scalar bias
+term, and then applies a non-linearity.
+Imagine that each neuron in a layer
+uses the same non-linear function.
+We can now vectorize
+the entire layer's computation!
+Each neuron receives the previous layer's output $x$
+as input.
+Let's say we have $d$ neurons in the current layer.
+The output of the $i$-th neuron
+in the layer can be written as:
+\begin{align*}
+  o_i = \theta(w_i \cdot x + b_i)
+\end{align*}
+Since each neuron outputs a scalar,
+we can take each of the $d$ outputs
+and make a $d$-dimensional vector
+$o = [o_1, \ldots, o_d]$.
+It turns out that $o$ can be written as
+\begin{align*}
+  o = \theta(Wx + b)
+\end{align*}
+where $W$ is a matrix
+whose rows are each $w_i$
+and $b$ is a vector
+whose entries are each $b_i$.
+$W$ is $d_o \times d_i$,
+where $d_i$ is dimension
+of the input vector
+and $d_o$ is size of our layer.
+
+Each layer will perform a similar
+calculation. Let's assume
+for simplicity, every layer in the network
+uses the same non-linear function $\theta$.
+For a 2-layer network,
+our final $h(x)$ can be written compactly as
+\begin{align*}
+  h(x) = \theta(W_2\theta(W_1x + b_1) + b_2)
+\end{align*}
+
+Adding a layer to the network nests the output
+of one network in yet another
+linear combination and non-linearity.
+
+What non-linear functions do we typically use?
+Well, the logistic is perhaps the simplest one.
+Another popular one is the hyperbolic tangent function,
+or \emph{tanh}. It looks like
+\begin{align*}
+  \theta(z) = \frac{e^z + e^{-z}}{e^z - e^{-z}}
+\end{align*}
+
+The tanh behaves exactly like the logistic function,
+but saturates at $-1$ and 1, instead of 0 and 1.
+
+\bibliography{dlhs}
+
+\end{document}
