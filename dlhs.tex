@@ -291,17 +291,23 @@ The artificial neuron is a building block
 for a neural network just as the neuron
 is a building block for the brain.
 
-Mathematically, an artificial neuron
-receives inputs from other neurons
+Every neuron outputs a scalar number,
+and receives input from several other neurons
 in the form of a vector $x$.
-The output of the neuron is
+The output of the neuron $f(x)$ combines
+the inputs in the following way:
+
 \begin{align*}
   f(x) = \theta(w \cdot x + b)
 \end{align*}
-This looks oddly similar to our
+
+In this equation, $\theta$
+is some function we choose beforehand
+and $w$ and $b$ are unknowns as before.
+$f(x)$ looks oddly similar to our
 logistic regression function,
-if we just replaced the $\theta$ function
-with the logistic.
+if we just choose $\theta$ 
+to be the logistic function.
 In fact, a single artificial neuron
 is a generalization of logistic regression.
 Each element of the vector $x_i$
@@ -336,7 +342,7 @@ is how we connect neurons together.
 In the real brain,
 there are cycles in neuron connectivity
 (neuron A can connect to neuron B which
-can connect back to C). In
+can connect back to A). In
 neural networks, we only allow
 \emph{feed-forward} connections.
 Neurons are only allowed to connect
@@ -352,7 +358,7 @@ It's easiest to see them layer-wise.
 Imagine the input to our network, $x$ (the data
 we wish to predict an output for),
 as a series of stacked nodes.
-Each of them feed into a layer of several stacked artificial neurons.
+Each node feeds into a layer of stacked artificial neurons.
 Each of these artificial neurons performs its calculation (a linear combination
 and a non-linear function), and has its own output.
 This output itself can be fed into another layer of
@@ -398,9 +404,9 @@ whose rows are each $w_i$
 and $b$ is a vector
 whose entries are each $b_i$.
 $W$ is $d_o \times d_i$,
-where $d_i$ is dimension
-of the input vector
-and $d_o$ is size of our layer.
+where $d_o$ is the size of our layer 
+and $d_i$ is dimension
+of the input vector.
 
 Each layer will perform a similar
 calculation. Let's assume
@@ -421,7 +427,7 @@ Well, the logistic is perhaps the simplest one.
 Another popular one is the hyperbolic tangent function,
 or \emph{tanh}. It looks like
 \begin{align*}
-  \theta(z) = \frac{e^z + e^{-z}}{e^z - e^{-z}}
+  \theta(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}
 \end{align*}
 
 The tanh behaves exactly like the logistic function,
